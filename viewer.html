@@ -29,15 +29,13 @@
     auto-rotate
     auto-rotate-delay="0"
     rotation-per-second="15deg"
-    camera-orbit="20deg 75deg auto"
-    min-camera-orbit="auto 0deg auto"
-    max-camera-orbit="auto 180deg auto"
+    camera-orbit="0deg 90deg 4m"
     touch-action="pan-y"
-    interaction-prompt="auto"
+    interaction-prompt="none"
     shadow-intensity="0.6"
     exposure="1.1"
     environment-image="neutral"
-    field-of-view="35deg"
+    field-of-view="auto"
     style="display:none">
   </model-viewer>
   <div class="err" id="err" style="display:none"></div>
@@ -68,6 +66,17 @@
       mv.style.display = 'none';
       err.style.display = 'block';
       err.textContent = `Could not load ${src}. The panel may not be deployed yet.`;
+    });
+    mv.addEventListener('load', () => {
+      // glTF Y is up. Show panel dims based on bbox.
+      const dims = mv.getDimensions();
+      const widthMm = Math.round(dims.x * 1000);
+      const heightMm = Math.round(dims.y * 1000);
+      const thickMm = Math.round(dims.z * 1000);
+      metaEl.textContent = `${widthMm} × ${heightMm} mm  ·  ${thickMm}mm thick`;
+      // Frame the panel: orbit slightly off-axis so depth is visible.
+      mv.cameraOrbit = '15deg 80deg auto';
+      mv.fieldOfView = 'auto';
     });
   }
 </script>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TLSTF Panel Viewer</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f4f4f1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 12px 16px; background: #1d3557; color: #fff; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.4px; }
+  header .meta { font-size: 12px; opacity: 0.85; }
+  main { display: flex; flex-direction: column; height: calc(100vh - 48px); }
+  model-viewer { flex: 1 1 auto; width: 100%; background: #f4f4f1; --poster-color: transparent; }
+  .toolbar { padding: 8px 12px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .toolbar a { color: #1d3557; text-decoration: none; padding: 4px 8px; border-radius: 4px; border: 1px solid #d0d0d0; }
+  .toolbar a:active { background: #1d3557; color: #fff; }
+  .err { padding: 24px; color: #b00; font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="panel-name">TLSTF Panel</h1>
+  <span class="meta" id="meta"></span>
+</header>
+<main>
+  <model-viewer id="mv"
+    camera-controls
+    auto-rotate
+    auto-rotate-delay="0"
+    rotation-per-second="15deg"
+    touch-action="pan-y"
+    interaction-prompt="auto"
+    shadow-intensity="0.6"
+    exposure="1.1"
+    environment-image="neutral"
+    field-of-view="35deg"
+    style="display:none">
+  </model-viewer>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="toolbar">
+    <a href="#" id="reset">Reset View</a>
+    <a href="./">All Panels</a>
+  </div>
+</main>
+<script>
+  const params = new URLSearchParams(location.search);
+  const panel = params.get('panel');
+  const mv = document.getElementById('mv');
+  const err = document.getElementById('err');
+  const nameEl = document.getElementById('panel-name');
+  const metaEl = document.getElementById('meta');
+  document.getElementById('reset').onclick = (e) => { e.preventDefault(); mv.cameraOrbit = 'auto auto auto'; mv.cameraTarget = 'auto auto auto'; mv.fieldOfView = 'auto'; };
+
+  if (!panel || !/^[A-Za-z0-9_]+$/.test(panel)) {
+    err.style.display = 'block';
+    err.textContent = "Missing or invalid ?panel= parameter.";
+  } else {
+    nameEl.textContent = panel.replace(/_/g, ' ');
+    metaEl.textContent = 'TLSTF — drag to orbit, pinch to zoom';
+    const src = `panels/${panel}.glb`;
+    mv.setAttribute('src', src);
+    mv.style.display = 'block';
+    mv.addEventListener('error', () => {
+      mv.style.display = 'none';
+      err.style.display = 'block';
+      err.textContent = `Could not load ${src}. The panel may not be deployed yet.`;
+    });
+  }
+</script>
+</body>
+</html>

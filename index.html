@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TLSTF Panels — MP Adams Plot 3</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f1; color: #222; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 16px; color: #1d3557; }
+  .lvl { margin-bottom: 24px; }
+  .lvl h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.6px; color: #555; margin: 0 0 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .grid a { display: block; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; text-align: center; text-decoration: none; color: #1d3557; font-weight: 500; font-size: 14px; }
+  .grid a:hover { background: #1d3557; color: #fff; border-color: #1d3557; }
+</style>
+</head>
+<body>
+<h1>TLSTF Panels — MP Adams Plot 3</h1>
+<div id="content"><p>Loading…</p></div>
+<script>
+  // Auto-discover panel glbs from manifest.json (deploy.py writes this).
+  fetch('manifest.json').then(r => r.json()).then(data => {
+    const root = document.getElementById('content');
+    root.innerHTML = '';
+    const groups = { GF: [], FF: [], GBL: [] };
+    for (const name of data.panels) {
+      const m = name.match(/^EX(\d+)_(GF|FF|GBL)$/);
+      if (m) groups[m[2]].push({ name, idx: parseInt(m[1], 10) });
+    }
+    for (const lvl of ['GF', 'FF', 'GBL']) {
+      const list = groups[lvl];
+      if (!list.length) continue;
+      list.sort((a, b) => a.idx - b.idx);
+      const div = document.createElement('div');
+      div.className = 'lvl';
+      div.innerHTML = `<h2>${lvl} — ${list.length} panel${list.length===1?'':'s'}</h2><div class="grid"></div>`;
+      const grid = div.querySelector('.grid');
+      for (const p of list) {
+        const a = document.createElement('a');
+        a.href = `viewer.html?panel=${p.name}`;
+        a.textContent = p.name.replace(/_/g, ' ');
+        grid.appendChild(a);
+      }
+      root.appendChild(div);
+    }
+  }).catch(() => {
+    document.getElementById('content').innerHTML = '<p>No panels deployed yet. Run <code>deploy.py</code> after exporting glb files.</p>';
+  });
+</script>
+</body>
+</html>
